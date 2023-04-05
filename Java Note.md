@@ -4,13 +4,13 @@
 
 ### 安装jdk
 
-#### Windows安装jdk
+#### 1.windows安装jdk
 
-- 下载jdk压缩包xxx.zip，解压到指定目录（解压后bin文件夹所在目录为jdk根目录，假设为`D:\java\jdk\xxx`）
-- 新增环境变量`JAVA_HOME：D:\java\jdk\xxx`
-- `Path`中添加：`%JAVA_HOME%\bin`
+- 1.下载jdk压缩包xxx.zip，解压到指定目录（解压后bin文件夹所在目录为jdk根目录，假设为`D:\java\jdk\xxx`）
+- 2.新增环境变量`JAVA_HOME：D:\java\jdk\xxx`
+- 3.`Path`中添加：`%JAVA_HOME%\bin`
 
-#### Linux安装jdk
+#### 2.linux安装jdk
 
 - 1.下载jdk压缩包xxx.tar.gz，解压到指定目录
 
@@ -47,7 +47,7 @@ source /etc/profile
 java -version
 ```
 
-### 基础笔记
+### 代码笔记
 
 - 若将多个类的声明放在一个文档中，只能有一个类声明为公有类。
 
@@ -55,9 +55,11 @@ java -version
 public class A {}
 
 class B {}
+
+class C {}
 ```
 
-- Java源文档名必须与文档中公有类名一致
+- Java源文档名必须与文档中公有类名一致（区分大小写）。
 
 ```java
 // 文件名必须为 A.java
@@ -76,21 +78,7 @@ public void function(List<Integer> list) {}
 public void function(ArrayList<Integer> list) {}
 ```
 
-- 继承写法
-
-```java
-public interface human {}
-
-// 子接口 extends 父接口
-public interface man extends human {}
-
-// 子类 implements 父接口
-public class father implements man {}
-
-// 子类 extends 父类
-public class son extends father {}
-```
-
+- 继承写法：子类名 extends 父类名；子类名 implements 父接口名；子接口名 extends 父接口名。
 - 用来存储对象的变量称为引用变量。
 - 方法名有final修饰，表示此方法是终结方法，不能被子类重写。
 - 可变长参数在一个方法中最多只能有一个，并且必须放在最后。
@@ -105,7 +93,7 @@ import lombok.Getter;
 
 @Getter
 public enum ColorEnum {
-    RED("255,0,0"), GREEN("0,255,0"), BLUE("0,0,255");
+    RED("red"), GREEN("green"), BLUE("blue");
 
     private String value;
 
@@ -122,7 +110,7 @@ public enum ColorEnum {
 
 - 类型比较运算符
   
-  1) point instanceof Point;// 如果point是Point类的一个实例，结果为true
+  1) point instanceof Point; // 如果point是Point类的一个实例，结果为true
   
   2) `基本数据类型`，== 比较的是`值`
   
@@ -177,6 +165,121 @@ try (InputStream inputStream = Application.class.getClassLoader().getResourceAsS
 
 - `JRE` 是 Java 运行时环境。它是运行已编译 Java 程序所需的所有内容的集合，包括 Java 虚拟机（JVM），Java 类库，java 命令和其他的一些基础构件。但是，它不能用于创建新程序。
 - `JDK` 是 Java Development Kit 缩写，它是功能齐全的 Java SDK。它拥有 JRE 所拥有的一切，还有编译器（javac）和工具（如 javadoc 和 jdb）。它能够创建和编译程序。
+
+### 二进制
+
+- 原码：一个正数，按照绝对值大小转换成的二进制数；一个负数，先按照绝对值大小转换成的二进制数，然后最高位置1
+
+- 反码：正数的反码与原码相同，负数的反码为其原码`除符号位`外`按位取反`
+
+- 补码：正数的补码与原码相同，负数的补码为其反码加1
+
+- 正数的二进制数为其原码，负数的二进制数为其补码
+
+```java
+// 原码 10000000 00000000 00000000 00000010
+// 反码 11111111 11111111 11111111 11111101
+// 反码 11111111 11111111 11111111 11111110
+String b = Integer.toBinaryString(-2); // 11111111 11111111 11111111 11111110
+```
+
+### 进制转换
+
+- 8位二进制为一个字节，范围值从0B00000000～0B11111111，程序中用十六进制表示的时候就是从0X00到0XFF
+
+- 二进制4位一组，遵循8,4,2,1的规律比如 1111，那么从最高位开始算，数字大小是8*1+4*1+2*1+1*1 = 15，那么十进制就是15，十六进制就是0XF。
+
+- 二进制转十六进制的时候，十六进制一位刚好是和二进制4位相互对应的。8位二进制为一个字节，对应十六进制2位。
+
+- Java中，byte、short、int、long分别占1、2、4、8个字节，char占2个字节
+
+#### 十进制转其它进制
+
+```java
+int a = 10;
+System.out.println(Integer.toBinaryString(a)); // 二进制   1010
+System.out.println(Integer.toOctalString(a));  // 八进制   12
+System.out.println(Integer.toHexString(a));    // 十六进制 a
+```
+
+#### byte[] 和十六进制字符串互转
+
+- 用Java自带方法转换
+
+```java
+byte[] data = {1, 2};
+String hexString = new BigInteger(1, data).toString(16);
+```
+
+- 引入第三方库转换
+
+```xml
+<dependency>
+    <groupId>commons-codec</groupId>
+    <artifactId>commons-codec</artifactId>
+    <version>1.14</version>
+</dependency>
+```
+
+```java
+// byte[] 转 16进制字符串
+String hexString = Hex.encodeHexString(datas);
+
+// 16进制字符串 转 byte[]
+byte[] datas = Hex.decodeHex(hexString);
+```
+
+- Hex.encodeHexString 底层代码剖析
+
+```java
+public String encodeHexString(final byte[] data) {
+    char[] DIGITS_UPPER = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+    final int outlength = data.length;
+    // 一个字节用两位16进制表示，out长度为data长度乘以2
+    final char[] out = new char[outlength << 1];
+    for (int i = 0, j = 0; i < outlength; i++) {
+    // 取高4位，无符号右移四位，得到16进制高位
+    // 0100 0001
+    // 1111 0000
+    // 0100 0000
+    // 0000 0100 = 4
+    // 相当于 out[j++] = DIGITS_UPPER[data[i] / 16];
+    out[j++] = DIGITS_UPPER[(0xF0 & data[i]) >>> 4];
+    // 取低4位，，得到16进制地位
+    // 0100 0001
+    // 0000 1111
+    // 0000 0001 = 1
+    // 相当于 out[j++] = DIGITS_UPPER[data[i] % 16];
+    out[j++] = DIGITS_UPPER[0x0F & data[i]];
+    }
+    return new String(out);
+}
+```
+
+### 移位运算
+
+对byte和short类型进行移位时，会首先转换为int再进行位移
+
+- 左移`<<`，最低位补0，十进制数m左移n位相当于m乘以2的n次方
+
+```java
+int m = 1;       // 00000000 00000000 00000000 00000001 = 1
+int r = m << 1;  // 00000000 00000000 00000000 00000010 = 2
+```
+
+- 右移`>>`，最高位补0，十进制数m右移n位相当于m除以2的n次方
+
+```java
+int m = 2;       // 00000000 00000000 00000000 00000010 = 2
+int r = m >> 1;  // 00000000 00000000 00000000 00000001 = 1
+```
+
+- 无符号右移`>>>`，高位总是补0，注意，`没有无符号左移`！
+
+```java
+int m = -2;        // 11111111 11111111 11111111 11111110 = -2
+int r = m >>> 1;   // 01111111 11111111 11111111 11111111 = 2147483647
+```
 
 ### java 数据类型
 
@@ -266,9 +369,12 @@ try {
 }
 try {
     // 6.关闭资源
-    if (statement!=null) {
+    if (statement!=null) { 
         statement.close();
-    if(connection!=null)connection.close();
+    }
+    if(connection!=null) {
+        connection.close();
+    }
 } catch(SQLException e) {
     log.error("", e);
 }
@@ -276,19 +382,18 @@ try {
 
 #### ResultSet获取行列数
 
-1) 获取列数：resultSet.getMetaData().getColumnCount();
-2) 获取行数：
+- 获取列数
 
 ```java
-// 方法一：测试结果很慢，可能是数据量太大了（10w）
-Statement statement=connection.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,ResultSet.CONCUR_UPDATABLE);
-ResultSet resultSet=statement.executeQuery("select * from person");
-resultSet.last();
-resultSet.getRow();
-
-// 方法二：比方法一快很多很多，建议这种方法
 ResultSet resultSet=statement.executeQuery("select count(*) from person");
-int row=resultSet.getInt(1);
+int columnNumbers = resultSet.getMetaData().getColumnCount();
+```
+
+- 获取行数
+
+```java
+ResultSet resultSet=statement.executeQuery("select count(*) from person");
+int rowNumbers = resultSet.getInt(1);
 ```
 
 ### 判null和判空语句
@@ -297,8 +402,8 @@ int row=resultSet.getInt(1);
 
 ```java
 if (null == object) {}
-if (Objects.isNull(object)) {}
 if (null != object) {}
+if (Objects.isNull(object)) {}
 if (Objects.nonNull(object)) {}
 ```
 
@@ -433,18 +538,18 @@ String s = new String(input, StandardCharsets.UTF_8);
 ### 默认域初始化
 
 - 如果在构造器中没有显式地给域赋予初值，那么就会被自动地赋为默认值： 数值为0、布尔值为false、对象引用为null。
+
 - 如果在编写一个类时没有编写构造器，那么系统就会提供一个无参数构造器。这个构造器将所有的实例域设置为默认值。
+
 - 仅当类没有提供任何构造器的时候，系统才会提供一个默认的构造器。如果类中提供了至少一个构造器，但是没有提供无参数的构造器，则在构造对象时如果没有提供参数就会被视为不合法。
 
 - 如果希望所有域被赋予默认值，可以采用下列格式
 
 ```java
-public ClassName () {
-
-}
+public ClassName () {}
 ```
 
-- 在执行构造器之前，先执行赋值操作。当一个类的所有构造器都希望把相同的值赋予某个特定的实例域时，这种方式特别有用。可以在类定义中， 直接将一个值赋给任何域。例如：
+- 在执行构造器之前，先执行赋值操作。当一个类的所有构造器都希望把相同的值赋予某个特定的实例域时，这种方式特别有用。可以在类定义中， 直接将一个值赋给任何域。
 
 ```java
 class Person {
@@ -560,22 +665,22 @@ public class ClassName {
 
 ### 1. 通配符类型(wildcard type)
 
-在Java 库中， 使用变量E 表示集合的元素类型， K 和V 分别表示表的关键字与值的类型。T ( 需要时还可以用临近的
-字母U 和S) 表示“ 任意类型”。
+在Java库中， 使用变量E表示集合的元素类型，K和V分别表示表的关键字与值的类型。T(需要时还可以用临近的
+字母U和S)表示“任意类型”。
 
 ### 2. 类型变量的限定（子类型限定）
 
-`<T extends BoundingType>`，表示==T 应该是绑定类型的子类型==（subtype)。T 和绑定类型可以是类， 也可以是接口。
+`<T extends BoundingType>`，表示T应该是绑定类型的子类型（subtype)。T和绑定类型可以是类，也可以是接口。
 
 一个类型变量或通配符可以有多个限定， 例如：
 `T extends Comparable & Serializable`
-限定类型用==“ &”== 分隔，而逗号用来分隔类型变量。在Java 的继承中， 可以根据需要拥有多个接口超类型， 但限定中至多有一个类。如果用一个类作为限定，它必须是限定列表中的第一个。为了提高效率， 应该将标签（ tagging) 接口（即没有方法的接口）放在边界列表的末尾。
+限定类型用`&`分隔，而逗号用来分隔类型变量。在Java的继承中，可以根据需要拥有多个接口超类型，但限定中至多有一个类。如果用一个类作为限定，它必须是限定列表中的第一个。为了提高效率，应该将标签（tagging）接口（即没有方法的接口）放在边界列表的末尾。
 
 ### 3. 通配符的超类型限定
 
-`<? super BoundingType>`，表示这个==通配符限制为绑定类型的所有超类型==。
+`<? super BoundingType>`，表示这个通配符限制为绑定类型的所有超类型。
 
-直观地讲，带有超类型限定的通配符可以向泛型对象写人，带有子类型限定的通配符可以从泛型对象读取。
+直观地讲，带有超类型限定的通配符可以向泛型对象写入，带有子类型限定的通配符可以从泛型对象读取。
 
 ### 4. 无限定通配符<?>
 
@@ -594,132 +699,202 @@ Thread t = new Thread(new Runnable() {
 
 ### Lambda表达式
 
-### 1. `Lambda`的基本语法
-
-1. (parameters) -> expression
-2. (parameters) -> { statements; }
-
-### 2. Java 8中有效的Lambda表达式
+- `Lambda`的基本语法
 
 ```java
-// 1.返回一个int。Lambda没有return语句，因为已经隐含了return
-() -> 42
+// 单表达式（单语句）
+(parameters) -> expression
 
-// 2.返回一个boolean（苹果的重量是否超过150克）
-(String s) -> s.length() > 150
-
-// 3.返回一个int：比较两个Apple的重量
-(Apple a1, Apple a2) -> a1.getWeight().compareTo(a2.getWeight())
-
-// 4.没有返回值（void返回）。注意Lambda表达式可以包含多行语句，这里是两行    
-(int x, int y) -> {
-    System.out.println("Result:");
-    System.out.println(x+y);
-}
-
-// 5.返回String（利用显式返回语句）
-() -> {return "Mario";}
-```
-
-Java 8中的常用函数式接口
-
-| 函数式接口               | 函数描述符          | 原始类型特化                                                                                                                                                                                          |
-|:------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Predicate<T>`      | T->boolean     | IntPredicate,LongPredicate,DoublePredicate                                                                                                                                                      |
-| `Consumer<T>`       | T->void        | IntConsumer,LongConsumer,DoubleConsumer                                                                                                                                                         |
-| `Function<T,R>`     | T->R           | `IntFunction<R>`,`LongFunction<R>`,`DoubleFunction<R>`,`ToIntFunction<T>`,`ToLongFunction<T>``ToDoubleFunction<T>`,IntToLongFunction,IntToDoubleFunction,LongToIntFunction,LongToDoubleFunction |
-| `Supplier<T>`       | ()->T          | BooleanSupplier,IntSupplier,LongSupplier,DoubleSupplier                                                                                                                                         |
-| `UnaryOperator<T>`  | T->T           | IntUnaryOperator,LongUnaryOperator,DoubleUnaryOperator                                                                                                                                          |
-| `BinaryOperator<T>` | (T,T)->T       | IntBinaryOperator,LongBinaryOperator,DoubleBinaryOperator                                                                                                                                       |
-| `BiPredicate<L,R>`  | (L,R)->boolean |                                                                                                                                                                                                 |
-| `BiConsumer<T,U>`   | (T,U)->void    | `ObjIntConsumer<T>``ObjLongConsumer<T>`,`ObjDoubleConsumer<T>`                                                                                                                                  |
-| `BiFunction<T,U,R>` | (T,U)->R       | `ToIntBiFunction<T,U>`,`ToLongBiFunction<T,U>`,`ToDoubleBiFunction<T,U>`                                                                                                                        |
-
-### 异常
-
-#### 捕获异常
-
-```java
-try {
-    // do something
-} catch (UnsupportedEncodingException e) {
-    // do something else
-} catch (IOException | NumberFormatException e) {
-    // do something other
-} finally {
-    // do something must be done
+// 多语句
+(parameters) -> { 
+    statement1; 
+    statement2; 
+    statementn; 
 }
 ```
 
-- 多个catch语句只有一个能被执行
-
-- 存在多个catch的时候，子类异常的catch必须写在前面
-
-- 如果某些异常的处理逻辑相同，但是异常本身不存在继承关系，可以用`|`合并到一起
-
-- 当某个方法抛出了异常时，如果当前方法没有捕获异常，异常就会被抛到上层调用方法，直到遇到某个try ... catch被捕获为止
-
-### 抛出异常
-
-- 为了能追踪到完整的异常栈，在构造异常的时候，把原始的Exception实例传进去，新的Exception就可以持有原始Exception信息
-  
-  ```java
-  try {
-  // do something
-  } catch (NullPointerException e) {
-      throw new IllegalArgumentException(e);
-  }
-  ```
-
-- 如果在try或者catch语句块中抛出异常，JVM会先执行finally，然后抛出异常
-
-- 如果在执行finally语句时抛出异常，在catch中准备抛出的异常就被屏蔽不会再被抛出了，这时候可以先用origin变量保存原始异常，然后调用Throwable.addSuppressed()，把原始异常添加进来，最后在finally抛出。绝大多数情况下，在finally中不要抛出异常
+- 无参，单表达式（单语句）
 
 ```java
-Exception origin = null;
-try {
-    // do something
-} catch (Exception e) {
-    origin = e;
-    throw e;
-} finally {
-    Exception e = new IllegalArgumentException();
-    if (origin != null) {
-        e.addSuppressed(origin);
-    }
-    throw e;
-}
+// 隐式返回
+() -> "Handle"
+
+// 显式返回
+() -> {return "Handle";}
 ```
 
-### 自定义异常
-
-在一个大型项目中，可以自定义新的异常类型，但是，保持一个合理的异常继承体系是非常重要的。
-
-一个常见的做法是自定义一个BaseException作为“根异常”，然后，派生出各种业务类型的异常。
-
-BaseException需要从一个适合的Exception派生，通常建议从RuntimeException派生
+- 有参，单表达式（单语句）
 
 ```java
-public class BaseException extends RuntimeException {
-    public BaseException() {
-        super();
-    }
+// 声明参数类型
+(String s) -> s.length()
 
-    public BaseException(String message) {
-        super(message);
-    }
+// 不声明参数类型
+(s) -> s.length()
 
-    public BaseException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public BaseException(Throwable cause) {
-        super(cause);
-    }
-}
+// 不声明参数类型，仅单个参数可以这么写
+s -> s.length()
 ```
+
+- 如果一个Lambda的主体是一个语句表达式，它就和一个参数列表类型、顺序一样，且返回void的函数描述符兼容
+
+```java
+// 尽管list.add(s)返回boolean，但是这个写法也是合法的
+Consumer<String> c = s -> list.add(s);
+```
+
+- Lambda中使用局部变量
+
+```java
+// port必须隐式为final或显式声明为final
+int port = 8888;
+Runnable r = () -> System.out.println(port);
+```
+
+- Lambda方法引用
+
+```java
+List<Integer> list = IntStream.rangeClosed(1, 3).boxed().collect(Collectors.toList());
+list.forEach(System.out::println);
+```
+
+- 构造函数引用
+
+```java
+Supplier<String> integer = String::new;
+```
+
+- 比较器
+
+```java
+Comparator.nullsFirst(Integer::compareTo);
+Comparator.comparing(String::valueOf, Comparator.nullsFirst(Integer::compareTo));
+```
+
+- 复合Lambda
+
+```java
+// 比较器复合
+students.sort(Comparator.comparing(Student::getClassName)
+    .reversed()
+    .thenComparing(Student::getAge));
+
+// 谓词复合
+predicate = predicate.negate().and(...).or(...)
+
+// 函数复合
+Function<Integer, Integer> f = x -> x + 1;
+Function<Integer, Integer> g = x -> x * 2;
+
+// g(f(x))
+Function<Integer, Integer> h = f.andThen(g);
+// f(g(x))
+Function<Integer, Integer> h2 = f.compose(g);
+```
+
+#### 函数式接口
+
+- 函数式接口就是只定义一个抽象方法的接口
+
+- 函数式接口可以有默认方法
+
+- 函数式接口不允许抛出受检异常
+
+- `@FunctionalInterface` 注解表明此接口是函数式接口
+
+- Java 8中的常用函数式接口
+
+| 函数式接口 | 函数描述符 | 原始类型特化 |
+|:--------- | --------- | ----------- |
+| `Predicate<T>` | T -> boolean | IntPredicate, LongPredicate, DoublePredicate |
+| `Consumer<T>`       | T -> void        | IntConsumer, LongConsumer, DoubleConsumer |
+| `Function<T,R>`     | T -> R           | `IntFunction<R>`, `LongFunction<R>`, `DoubleFunction<R>`,`ToIntFunction<T>`, `ToLongFunction<T>` `ToDoubleFunction<T>`, IntToLongFunction, IntToDoubleFunction, LongToIntFunction, LongToDoubleFunction |
+| `Supplier<T>`       | () -> T          | BooleanSupplier, IntSupplier, LongSupplier, DoubleSupplier |
+| `UnaryOperator<T>`  | T -> T           | IntUnaryOperator, LongUnaryOperator, DoubleUnaryOperator|
+| `BinaryOperator<T>` | (T,T) -> T       | IntBinaryOperator, LongBinaryOperator, DoubleBinaryOperator |
+| `BiPredicate<L,R>`  | (L,R) -> boolean ||
+| `BiConsumer<T,U>`   | (T,U) -> void    | `ObjIntConsumer<T>`, `ObjLongConsumer<T>`, `ObjDoubleConsumer<T>` |
+| `BiFunction<T,U,R>` | (T, U) -> R      | `ToIntBiFunction<T, U>`, `ToLongBiFunction<T, U>`, `ToDoubleBiFunction<T, U>` |
 
 ### Stream
+
+- 中间操作：中间操作会返回另一个流
+
+- 终端操作：终端操作会从流的流水线生成结果。其结果是任何不是流的值。
+
+#### 构建流
+
+```java
+// 空流
+Stream<String> emptyStream = Stream.empty();
+
+// 由值创建流
+Stream<String> stream = Stream.of("a", "b", "c");
+
+// 由数组创建流
+int[] numbers = {1, 2, 3};
+IntStream stream = Arrays.stream(numbers);
+
+// 由文件生成流
+Stream<String> lines = Files.lines(Paths.get("data.txt"), Charset.defaultCharset());
+
+// 由函数生成流
+List<Integer> list = Stream.iterate(1, n -> n + 1).limit(3).collect(Collectors.toList());
+List<Double> list = Stream.generate(Math::random).limit(3).collect(Collectors.toList());
+```
+
+#### 规约
+
+```java
+// 统计流中元素个数
+long count = numbers.stream().count();
+
+// 使用收集器统计流中元素个数
+long count = numbers.stream().collect(Collectors.counting());
+
+// 对流中所有的元素求和，初始值为0
+int sum = numbers.stream().reduce(0, (a, b) -> a + b);
+
+// 使用方法引用
+int sum = numbers.stream().reduce(0, Integer::sum);
+
+int totalCalories = menu.stream().collect(Collectors.reducing(0, Dish::getCalories, (i, j) -> i + j));
+
+// 考虑流中没有任何元素的情况。reduce操作无法返回其和，因为它没有初始值
+Optional<Integer> sum = numbers.stream().reduce((a, b) -> (a + b)); 
+
+// IntStream、DoubleStream和LongStream，分别将流中的元素特化为int、long和double，从而避免了暗含的装箱成本。
+// 每个接口都包含常用数值归约的新方法，比如对数值流求和的sum，max、min、average等
+int sum = IntStream.rangeClosed(1, 3).sum();
+
+// 使用收集器汇总
+int totalCalories = menu.stream().collect(Collectors.summingInt(Dish::getCalories));
+
+OptionalInt max = IntStream.rangeClosed(1, 3).max();
+
+OptionalInt min = IntStream.rangeClosed(1, 3).min();
+
+OptionalDouble average = IntStream.rangeClosed(1, 3).average();
+
+// 使用收集器计算平均值
+double avgCalories = menu.stream().collect(Collectors.averagingInt(Dish::getCalories));
+
+// 最大值
+Optional<Integer> max = numbers.stream().reduce(Integer::max);
+
+// 最小值
+Optional<Integer> min = numbers.stream().reduce(Integer::min);
+
+// 使用收集器计算最大值
+Comparator<Dish> dishCaloriesComparator = Comparator.comparingInt(Dish::getCalories); 
+Optional<Dish> mostCalorieDish = menu.stream().collect(Collectors.maxBy(dishCaloriesComparator));
+
+// 使用收集器一次获取个数、和、最大最小、平均值
+IntSummaryStatistics menuStatistics = menu.stream().collect(Collectors.summarizingInt(Dish::getCalories));
+
+// 使用收集器连接字符串
+String shortMenu = menu.stream().map(Dish::getName).collect(Collectors.joining());
+```
 
 #### 分组 Collectors.groupingBy
 
@@ -852,6 +1027,234 @@ Map<Boolean, Dish> mostCaloricPartitionedByVegetarian = menu.stream().collect(
 ### 类路径
 
 ![image-20211024164152086](image-20211024164152086.png)
+
+### 异常
+
+- 当某个方法抛出了异常时，如果当前方法没有捕获异常，异常就会被抛到上层调用方法，直到遇到某个try {...} catch {...} finally {}被捕获为止
+
+#### 捕获异常
+
+- 捕获异常使用try {...} catch {...} finally {} 语句，把可能发生异常的代码放到try中，然后使用catch捕获对应的Exception及其子类
+
+- 多个catch语句只有一个能被执行
+
+- 存在多个catch的时候，子类异常的catch必须写在前面
+
+- 如果某些异常的处理逻辑相同，但是异常本身不存在继承关系，可以用`|`合并到一起
+
+```java
+try {
+    // do something
+} catch (UnsupportedEncodingException e) {
+    // do something else
+} catch (IOException | NumberFormatException e) {
+    // do something other
+} finally {
+    // do something must be done
+}
+```
+
+#### 抛出异常
+
+- 用 `throw new 异常名` 抛出异常
+
+- 为了能追踪到完整的异常栈，在构造异常的时候，把原始的Exception实例传进去，新的Exception就可以持有原始Exception信息
+  
+  ```java
+  try {
+  // do something
+  } catch (NullPointerException e) {
+      throw new IllegalArgumentException(e);
+  }
+  ```
+
+- 如果在try或者catch语句块中抛出异常，JVM会先执行finally，然后抛出异常
+
+- 如果在执行finally语句时抛出异常，在catch中准备抛出的异常就被屏蔽不会再被抛出了，这时候可以先用origin变量保存原始异常，然后调用Throwable.addSuppressed()，把原始异常添加进来，最后在finally抛出。绝大多数情况下，在finally中不要抛出异常
+
+```java
+Exception origin = null;
+try {
+    // do something
+} catch (Exception e) {
+    origin = e;
+    throw e;
+} finally {
+    Exception e = new IllegalArgumentException();
+    if (origin != null) {
+        e.addSuppressed(origin);
+    }
+    throw e;
+}
+```
+
+#### 自定义异常
+
+在一个大型项目中，可以自定义新的异常类型，但是，保持一个合理的异常继承体系是非常重要的。
+
+一个常见的做法是自定义一个BaseException作为“根异常”，然后，派生出各种业务类型的异常。
+
+BaseException需要从一个适合的Exception派生，通常建议从RuntimeException派生
+
+```java
+public class BaseException extends RuntimeException {
+    public BaseException() {
+        super();
+    }
+
+    public BaseException(String message) {
+        super(message);
+    }
+
+    public BaseException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public BaseException(Throwable cause) {
+        super(cause);
+    }
+}
+```
+
+### 加密
+
+```java
+package com.lsh.demo.common;
+
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.digest.HmacAlgorithms;
+
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+/**
+ * HmacUtils
+ *
+ * @author lsh
+ * @date 2023-03-22 16:00:37
+ * @since jdk-1.8
+ */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public final class HmacUtils {
+    public static final String HMAC_MD5 = HmacAlgorithms.HMAC_MD5.getName();
+
+    /**
+     * 生成随机盐
+     * 
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
+    public static byte[] getRandomSalt() throws NoSuchAlgorithmException {
+        return getRandomSalt(HMAC_MD5);
+    }
+
+    /**
+     * 生成随机盐
+     * 
+     * @param algorithm
+     * @return
+     * @throws NoSuchAlgorithmException
+     */
+    public static byte[] getRandomSalt(String algorithm) throws NoSuchAlgorithmException {
+        // 1.获取HmacMD5的KeyGenerator实例
+        KeyGenerator keyGenerator = KeyGenerator.getInstance(algorithm);
+
+        // 2.通过KeyGenerator创建SecretKey实例
+        SecretKey secretKey = keyGenerator.generateKey();
+
+        // 3.生成随机的key字节数组，得到salt
+        return secretKey.getEncoded();
+    }
+
+    /**
+     * 获取HmacMD5加盐哈希值
+     * 
+     * @param salt
+     * @param input
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws DecoderException
+     */
+    public static String getHmac(String salt, String input) throws NoSuchAlgorithmException, InvalidKeyException, DecoderException {
+        return getHmac(salt, input, HMAC_MD5);
+    }
+
+    /**
+     * 获取加盐哈希值
+     * 
+     * @param salt
+     * @param input
+     * @param algorithm
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws DecoderException
+     */
+    public static String getHmac(String salt, String input, String algorithm) throws NoSuchAlgorithmException, InvalidKeyException, DecoderException {
+        // 16进制salt字符串 转 byte[]
+        byte[] salts = Hex.decodeHex(salt);
+        return getHmac(salts, input, algorithm);
+    }
+
+    /**
+     * 获取HmacMD5加盐哈希值
+     * 
+     * @param salts
+     * @param input
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws DecoderException
+     */
+    public static String getHmac(byte[] salts, String input) throws NoSuchAlgorithmException, InvalidKeyException, DecoderException {
+        return getHmac(salts, input, HMAC_MD5);
+    }
+
+    /**
+     * 获取加盐哈希值
+     * 
+     * @param salts
+     * @param input
+     * @param algorithm
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @throws DecoderException
+     */
+    public static String getHmac(byte[] salts, String input, String algorithm)
+            throws NoSuchAlgorithmException, InvalidKeyException, DecoderException {
+        // 恢复成SecretKey
+        SecretKey secretKey = new SecretKeySpec(salts, algorithm);
+
+        // 通过HmacMD5 获取Mac 实例
+        Mac mac = Mac.getInstance(algorithm);
+
+        // 用SecretKey 实例初始化Mac 实例
+        mac.init(secretKey);
+
+        // 对Mac实例反复调用update(byte[])输入数据
+        mac.update(input.getBytes(StandardCharsets.UTF_8));
+
+        // 调用Mac实例的doFinal()获取最终的哈希值
+        byte[] password = mac.doFinal();
+
+        // byte[] 转为16进制字符串
+        return Hex.encodeHexString(password);
+    }
+}
+
+```
 
 ### 日志
 
@@ -1678,7 +2081,29 @@ public class Account {
 }
 ```
 
+## EasyExcel
+
+```java
+// 同步读，headRowNumber(0)：标题行和数据行都读到列表中
+List<Map<Integer, String>> listMap = EasyExcel.read(inputStream).sheet().headRowNumber(0).doReadSync();
+```
+
 ## Mybatis
+
+### 需要转义的符号
+
+也可以用`<![CDATA[特殊符号]]>`，无需进行转义
+
+| 符号 | 原符号| 替换符号 |
+| ---  | ---- | ------- |
+| 小于 | < | `&lt;` |
+| 小于等于 | <= | `&lt;=` |
+| 大于 | > | `&gt;` |
+| 大于等于 | >= | `&gt;=` |
+| 不等于 | <> | `&lt;&gt;` |
+| 与 | & | `&amp;` |
+| 单引号 | ' | `&apos;` |
+| 双引号 | " | `&quot;` |
 
 ### `if`元素
 
@@ -1706,6 +2131,19 @@ public class Account {
     <foreach collection="ids" item="item" open="(" separator="," close=")">
         #{item}
     </foreach>
+</if>
+<if test="ids != null and !ids.isEmpty()">
+    and id in
+    <foreach collection="ids" item="item" open="(" separator="," close=")">
+        #{item}
+    </foreach>
+</if>
+```
+
+- 布尔值判断
+
+```xml
+<if test="true == deleteFlag">
 </if>
 ```
 
@@ -1751,6 +2189,43 @@ public class Account {
     </set>
     where id=#{id}
 </update>
+```
+
+### choose元素
+
+```xml
+<choose>  
+    <when test="username != null and username != ''">  
+        user_name=#{username} 
+    </when >  
+    <otherwise>
+        user_name is null
+    </otherwise>  
+</choose>  
+
+```
+
+### in 条件大于1000
+
+- 待验证
+
+```xml
+(
+    id in
+    <foreach collection="ids" item="item" index="index" open="(" separator="," close=")">
+        <if test="index % 999 == 998">) or id in (</if>
+        #{item}
+    </foreach>
+)
+```
+
+- 更直观
+
+```xml
+(1, id) in
+<foreach collection="ids" item="item" index="index" open="(" separator=',' close=")">
+    (1, #{item})
+</foreach>
 ```
 
 ### `resultMap`
@@ -2152,18 +2627,6 @@ UserDO user = userDAO.queryUser(userId);
 ```java
 // 当没有用户年龄为userAge的记录时，users不为null，其长度为0
 List<UserDO> users = userDAO.queryUsers(userAge);
-```
-
-#### 数据格式转换
-
-- 数据库日期类型自动转为java8日期类
-
-```xml
-<dependency>
-    <groupId>org.mybatis</groupId>
-    <artifactId>mybatis-typehandlers-jsr310</artifactId>
-    <version>1.0.2</version>
-</dependency>
 ```
 
 ## Spring
@@ -2598,39 +3061,6 @@ public static void main(String[] args) {
     app.setBannerMode(Banner.Mode.OFF);
     app.run(args);
 }
-```
-
-### 时间格式序列化/反序列化
-
-- 默认Jackson的情况
-
-```java
-@Bean
-public Jackson2ObjectMapperBuilderCustomizer customizeLocalDateTimeFormat() {
-    return jacksonObjectMapperBuilder -> {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        LocalDateTimeDeserializer deserializer = new LocalDateTimeDeserializer(formatter);
-        LocalDateTimeSerializer serializer = new LocalDateTimeSerializer(formatter);
-        jacksonObjectMapperBuilder.serializerByType(LocalDateTime.class, serializer);
-        jacksonObjectMapperBuilder.deserializerByType(LocalDateTime.class, deserializer);
-    };
-}
-```
-
-- 格式化注解支持依赖
-
-```xml
-<dependency>
-    <groupId>com.fasterxml.jackson.datatype</groupId>
-    <artifactId>jackson-datatype-jsr310</artifactId>
-    <version>2.9.8</version>
-</dependency>
-```
-
-- 在对应字段添加注解
-
-```java
- @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd HH:mm:ss", timezone="GMT+8")
 ```
 
 ### 常用注解
@@ -3910,24 +4340,40 @@ bin/zkServer.sh status
 
 ## docker
 
-docker的基本组成：镜像、容器、仓库
+- docker的基本组成：镜像、容器、仓库
+
+- 虚悬镜像：仓库名、标签都是`<none>`的镜像
 
 ### 安装docker
 
 ```sh
+# 如果安装过docker，先卸载旧版本的docker
+sudo yum remove docker \
+    docker-client \
+    docker-client-latest \
+    docker-common \
+    docker-latest \
+    docker-latest-logrotate \
+    docker-logrotate \
+    docker-engine
+
+
 # 安装yum-utils，其提供了yum-config-manager
 sudo yum install -y yum-utils
 
-# 配置yum-config-manager
+# 配置yum-config-manager，添加仓库地址，这里需要配置成国内仓库，比如阿里云，不要用官网默认的
 sudo yum-config-manager \
     --add-repo \
-    https://download.docker.com/linux/centos/docker-ce.repo
+    http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 
-# 安装docker引擎
-sudo yum install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+# 更新yum软件包索引（可选操作）
+sudo yum makecache fast 
+
+# 安装docker引擎，如果提示接受GPG密钥，请验证指纹是否匹配060A 61C5 1B55 8A7F 742B 77AA C52F EB6B 621E 9F35，如果是，则接受它
+sudo yum install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
 # 卸载docker引擎，但不会删除docker镜像、容器和配置文件，docker镜像、容器和配置文件需要手动删除
-sudo yum remove docker-ce docker-ce-cli containerd.io
+sudo yum remove docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras
 
 # 删除docker镜像
 sudo rm -rf /var/lib/docker
@@ -3936,7 +4382,7 @@ sudo rm -rf /var/lib/docker
 sudo rm -rf /var/lib/containerd
 ```
 
-### 配置国内镜像源
+#### 配置国内镜像源
 
 - 1.配置文件`/etc/docker/daemon.json`中加入
 
@@ -3963,7 +4409,7 @@ Registry Mirrors:
     <https://docker.mirrors.ustc.edu.cn/>
 ```
 
-### 启动docker
+#### 启动docker
 
 ```sh
 # 启动docker
@@ -3987,64 +4433,132 @@ sudo systemctl enable docker
 #### 帮助命令
 
 ```sh
+# docker版本
 docker version
 
+# docker概要信息
 docker info
 
+# docker总体帮助文档
 docker help
+
+# docker命令帮助文档
+docker 具体命令 --help
 ```
 
 #### 镜像命令
 
+- 列出本地主机所有镜像
+
 ```sh
-# docker search 查询关键字：查询镜像，最好去docker hub查询指定版本的详细信息，如镜像标签
-docker search tomcat
+# -a 列出本地所有镜像（含历史映像层），-q 只显示镜像id
+docker images [-aq]
+```
 
-# 拉取镜像，镜像名:标签
+- 查询镜像
+
+```sh
+# 最好是去docker hub查询指定版本的详细信息，如镜像标签，只列出25个镜像（默认）
+docker search [--limit 25] 镜像关键字 
+
+docker search --limit 25 tomcat
+```
+
+- 拉取镜像
+
+```sh
+# 不指定标签会拉取最新镜像，相当于docker pull 镜像名:latest
+docker pull 镜像名[:标签]
+
 docker pull mysql:8.0.29
+```
 
-# 列出所有本地镜像
-docker images
+- 查看镜像/容器/数据卷所占的空间
 
-# docker rmi 镜像id或镜像名:删除镜像，-f强行删除
+```sh
+docker system df
+```
+
+- 删除镜像
+
+```sh
+# -f 强行删除
+docker rmi [-f] 镜像id或镜像名:标签
+
+# 删除单个镜像
 docker rmi -f mysql:8.0.29
-docker rmi -f 镜像名1:tag 镜像名2:tag
+
+# 删除多个镜像
+docker rmi -f 镜像名1:标签 镜像名2:标签
 
 # 删除全部镜像
-docker rmi -f $(docker images -qa)
+docker rmi -f $(docker images -aq)
 ```
 
 #### 容器命令
 
+- 新建容器并运行
+
 ```sh
-# 根据镜像新建容器，指定容器名称并运行，-d：后台运行
-docker run --name 自定义容器名 -d 镜像名
+# --name 自定义容器名
+# -d 后台运行容器并返回容器id，也即启动守护式容器
+# -i 以交互模式运行容器，通常与-t同时使用
+# -t 为容器重新分配一个伪输入终端，通常与-i同时使用，-it即启动交互式容器（前台有伪终端，等待交互）
+# -p 主机端口:容器端口
+# -P 随机分配主机端口，很少用
+docker run [选项] 镜像名:标签 [命令] [ARG...]
 
-# 启动交互式容器，i 交互，t 终端
-# -p 主机端口:docker容器端口
-# -P 随机分配主机端口
-docker run -it -p 8888:8080 tomcat
+# 使用镜像centos:latest以交互模式新建一个容器并运行，在容器内执行/bin/bash命令
+# 放在镜像名后的是命令，这里我们希望有个交互式shell，这里用的是/bin/bash
+# 要退出终端，输入exit
+docker run -it centos /bin/bash
+```
 
-# 启动容器
-docker start 容器id
+- 展示容器列表（默认正在运行的容器）
+
+```sh
+# -a 列出所有的容器
+# -l 显示最近创建的容器
+# -n 任意正整数 显示任意个最近创建的容器
+# -q 静默模式，只显示容器编号
+docker ps [选项]
+```
+
+- 退出容器
+
+```sh
+# 在交互式伪终端，用exit退出，容器停止
+exit
+
+# 在交互式伪终端，按ctrl + p + q，容器不停止
+ctrl + p + q
+```
+
+- 删除容器
+
+```sh
+# 单个删除已停止的容器，如果容器正在运行要加-f强制删除
+docker rm [-f] 容器id
+
+# 删除全部容器
+docker rm -f $(docker ps -a -q)
+
+# 删除全部容器
+docker ps -a -q | xargs docker rm
+```
+
+```sh
+# 启动已停止运行的容器
+docker start 容器id/容器名
 
 # 重启容器
-docker restart 容器id
+docker restart 容器id/容器名
 
 # 停止正在运行的容器
 docker stop 容器id或容器名
 
-# 强行停止容器
+# 强制停止容器
 docker kill 容器id或容器名
-
-# 删除已停止的容器，如果容器正在运行要加-f强行删除，rmi为删除镜像
-docker rm 容器id
-
-# 删除全部容器
-docker rm -f $(docker ps -qa)
-
-# 删除全部容器
-docker ps -qa|xargs docker rm
 
 # 查看容器日志，-t显示时间，-f 跟随最新的日志显示，--tail限制显示的日志行数
 docker logs -t -f --tail 5 容器id
@@ -4054,9 +4568,6 @@ docker top 容器id
 
 # 查看容器内部细节
 docker inspect 容器id
-
-# 列出当前正在运行的容器
-docker ps
 
 # 重新进入容器，不会启动新进程
 docker attach 容器id
@@ -4309,31 +4820,13 @@ public class AmqpApplicationTests {
 1. 定义宠物类
 
 ```java
+@Getter
+@Setter
+@ToString
 public class Pet {
     private String name;
 
     private int age;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    @Override
-    public String toString() {
-        return "Pet [age=" + age + ", name=" + name + "]";
-    }
 }
 ```
 
@@ -4389,33 +4882,15 @@ pet.age = 3
 2.定义宠物类
 
 ```java
+@Getter
+@Setter
+@ToString
 @Component
 @ConfigurationProperties(prefix = "pet")
 public class Pet {
     private String name;
 
     private int age;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    @Override
-    public String toString() {
-        return "Pet [age=" + age + ", name=" + name + "]";
-    }
 }
 ```
 
@@ -4431,32 +4906,14 @@ pet.age = 3
 2.定义宠物类
 
 ```java
+@Getter
+@Setter
+@ToString
 @ConfigurationProperties(prefix = "pet")
 public class Pet {
     private String name;
 
     private int age;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    @Override
-    public String toString() {
-        return "Pet [age=" + age + ", name=" + name + "]";
-    }
 }
 ```
 
@@ -4472,21 +4929,30 @@ public class MainConfiguration {
 
 ### 请求处理常用的参数注解
 
-- 1. @PathVariable ：获取路径变量
-
-    ![getPathVariables](2021-04-10-19-44-11.png)
-    ![getPathVariables](2021-04-10-19-41-33.png)
-
-- 2. @RequestParam : 获取请求参数，把请求中指定名称的参数的值赋给控制器中的形参
+- @PathVariable ：获取路径变量
 
 ```java
- @GetMapping("/user/{id}/{name}/getRequestParams")
+ @GetMapping("/user/{id}/{name}/getPathVariables")
+ public Map<String, Object> getPathVariables(
+    @PathVariable("id") Integer id,
+    @PathVariable("name") String name,
+    @PathVariable Map<String, String> allPathVariables) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
+        map.put("name", name);
+        map.put("allPathVariables", allPathVariables);
+        return map;
+    }
+```
+
+- @RequestParam : 获取请求参数，把请求中指定名称的参数的值赋给控制器中的形参
+
+```java
+ @GetMapping("/user/getRequestParams")
  public Map<String, Object> getRequestParams(
     @RequestParam("age") Integer age,
     @RequestParam("interest") List<String> interests,
     @RequestParam Map<String, String> allRequestParams) {
-
-        // 将入参的值再封装到map然后返回
         Map<String, Object> map = new HashMap<>();
         map.put("age", age);
         map.put("interest", interests);
@@ -4495,35 +4961,70 @@ public class MainConfiguration {
     }
 ```
 
-请求url：`localhost:8080/application/user/233/dufu/getRequestParams?age=18&interest=basketball&interest=movie`
+请求url：`localhost:8080/application/getRequestParams?age=18&interest=basketball&interest=movie`
 
 方法返回：`{"interest": ["basketball","movie"],"allRequestParams": {"age": "18", "interest": "basketball"},"age": 18}`
 
-- 3. @RequestBody : 获取请求体
+- @RequestBody : 获取请求体
 
-    ![getRequestBody](2021-04-10-19-53-22.png)
-    ![getRequestBody](2021-04-10-22-52-40.png)
-    ![getRequestBody](2021-04-10-20-50-43.png)
-    ![getRequestBody](2021-04-10-20-49-34.png)
+```java
+@PostMapping("/user/getRequestBody")
+public Map<String, Object> getRequestBody(@RequestBody String content) {
+     Map<String, Object> map = new HashMap<>();
+     map.put("content", content);
+     return map;
+}
+```
 
-- 4. @RequestHeader : 获取请求头
+- @RequestHeader : 获取请求头
 
-    ![getHeaders](2021-04-10-22-58-26.png)
-    ![getHeaders](2021-04-10-22-59-56.png)
+```java
+@PostMapping("/user/getHeaders")
+public Map<String, Object> getHeaders(
+    @RequestHeader("Host") String host,
+    @RequestHeader Map<String, String> allHeaders) {
+     Map<String, Object> map = new HashMap<>();
+     map.put("host", host);
+     map.put("allHeaders", allHeaders);
+     return map;
+}
+```
 
-- 5. @CookieValue : 获取 cookie 值
+- @CookieValue : 获取 cookie 值
 
-    ![getCookieValues](2021-04-10-23-34-53.png)
-    ![getCookieValues](2021-04-10-23-36-05.png)
-    ![getCookieValues](2021-04-10-23-37-43.png)
-    ![getCookieValues](2021-04-10-23-36-57.png)
+```java
+/**
+ * 获取cookie
+ */
+@PostMapping("/user/getCookies")
+public Map<String, Object> getCookies(
+    @CookieValue("id") id,
+    @CookieValue Cookie cookies) {
+    Cookie cookie = new Cookie("userName", "呆鹅大人");
+    Map<String, Object> map = new HashMap<>();
+    map.put("id", id);
+    map.put("cookies", cookies);
+    return map;
+}
 
-- 6. @RequestAttribute : 获取 request 的属性的值
+
+/**
+ * 设置cookie
+ */
+@PostMapping("/user/setCookies")
+public String setCookies(HttpServletResponse response) {
+    Cookie cookie = new Cookie("userName", "呆鹅大人");
+     response.addCookie(cookie);
+     return "set cookie success";
+}
+```
+
+- @RequestAttribute : 获取 request 的属性的值
     ![getRequestAttribute](2021-04-11-21-44-19.png)
     ![getRequestAttribute](2021-04-11-21-47-31.png)
     ![getRequestAttribute](2021-04-11-21-41-12.png)
 
-- 7. @MatrixVariable : 获取矩阵变量的值
+- @MatrixVariable : 获取矩阵变量的值
 
     ![getMatrixVariables](2021-04-11-15-30-06.png)
     ![getMatrixVariables](2021-04-11-20-42-34.png)
@@ -4545,7 +5046,7 @@ public class MainConfiguration {
 
 ### 安装Maven
 
-- `MAVEN_HOME\conf\settings.xml` 配置文档设置
+- `MAVEN_HOME\conf\settings.xml` 配置文件
   
 ```xml
 <!-- 设置本地仓库路径 -->
@@ -4607,7 +5108,7 @@ public class MainConfiguration {
 
 - 设置jar包保存路径
   
-    ![image-20210819231258433](image-20210819231258433.png)
+    ![Blob Stores](/images/BlobStores.png "Blob Stores")
 
 - 设置`maven`配置文档`..\apache-maven-3.6.3\conf\settings.xml` server的id和repository的id要一致
 
@@ -4847,15 +5348,31 @@ mvn install:install -file -Dfile=d:\sqljdbc-4.1.5605.jar -Dpackaging=jar -Dgroup
 </project>
 ```
 
+### maven坐标
+
+```xml
+<dependency>
+    <groupId>com.handle</groupId>
+    <artifactId>commons</artifactId>
+    <version>1.0.0</version>
+</dependency>
+```
+
+一个Maven工程由groupId，artifactId和version作为唯一标识
+
+- groupId类似于Java的包名，通常是公司或组织名称
+- artifactId类似于Java的类名，通常是项目名称
+- version，jar包版本，如1.0.0
+
 ### maven 常见问题及解决方案
 
 #### 1. maven 控制台日志乱码
 
-- 查看 maven 默认编码：`mvn -version`
+- 查看 maven 默认编码：`mvn -v`
 
-- 设置默认编码：`-Dfile.encoding=GBK`
+- 设置maven默认编码：`-Dfile.encoding=GBK`
   
-    ![maven-vmoption](maven-vmoption-1633327479090.png)
+    ![设置maven默认编码](/images/设置maven默认编码.png "设置maven默认编码")
 
 ## gradle
 
@@ -4869,11 +5386,15 @@ mvn install:install -file -Dfile=d:\sqljdbc-4.1.5605.jar -Dpackaging=jar -Dgroup
 
 ### 安装
 
-安装完成后，还需要最后一步设置，因为Git是分布式版本控制系统，所以，每个机器都必须自报家门：你的名字和Email地址。
-
 ```sh
-# 
-# global参数，表示你这台机器上所有的Git仓库都会使用这个配置，当然也可以对某个仓库指定不同的用户名和Email地址。
+# 查看git配置
+git config --global --list
+
+# 生成ssh key
+ ssh-keygen -t rsa -C "这里填你的邮箱"
+
+# 安装完成后，还需要最后一步设置，因为Git是分布式版本控制系统，所以，每个机器都必须自报家门：你的名字和Email地址
+# global参数，表示你这台机器上所有的Git仓库都会使用这个配置，当然也可以对某个仓库指定不同的用户名和Email地址
 git config --global user.name "Your Name"
 git config --global user.email "email@example.com"
 ```
@@ -4952,8 +5473,14 @@ git clone url directoryname
 # 查看提交历史
 git log
 
+# 按行展示log
+git log --pretty=oneline
+
 # 查看某个人的提交记录
 git log --author=somebody
+
+# 查看git历史执行过的命令
+git reflog
 ```
 
 - 撤销操作
@@ -4970,7 +5497,15 @@ git checkout --filename
 
 # 丢弃本地的所有改动与提交，获取服务器上最新的版本历史，并将本地主分支指向它
 git fetch origin
-git reset --hard origin/master
+
+# 回退到上一个版本
+git reset --hard HEAD^
+
+# 回退到指定分支
+git reset --hard origin/dev
+
+# 回退到指定提交id
+git reset --hard commitId
 ```
 
 ### 分支操作
@@ -4995,68 +5530,159 @@ git branch -d dev
 git push origin
 ```
 
+### git常见问题
+
+- Please commit your changes or stash them before you merge.
+
+解决方法：通过git stash将工作区恢复到上次提交的内容，同时备份本地所做的修改，之后就可以正常git pull了，git pull完成后，执行git stash pop将之前本地做的修改应用到当前工作区。
+
+```cmd
+git stash
+git pull
+git stash pop
+```
+
+git stash: 备份当前的工作区的内容，从最近的一次提交中读取相关内容，让工作区保证和上次提交的内容一致。同时，将当前的工作区内容保存到Git栈中。
+
+git stash pop: 从Git栈中读取最近一次保存的内容，恢复工作区的相关内容。由于可能存在多个Stash的内容，所以用栈来管理，pop会从最近的一个stash中读取内容并恢复。
+
 ## 数据库篇
 
-### 1. MySQL
+### PostgreSQL
+
+#### 安装docker版本PostgreSQL
+
+```sh
+docker pull postgres：14.7
+```
+
+#### pg控制台命令
+
+|快捷键|功能|
+|:-|:-|
+|\password|设置密码|
+|\h [sql命令]|查看sql命令的解释|
+|\?|查看pgsql命令列表|
+|\l|列出所有数据库|
+|\c [database_name]|连接其它数据库|
+|\d|列出当前数据库的所有表格|
+|\d [tablename]|列出指定表的结构|
+|\du|列出所有用户|
+|q|退出|
+
+#### 备份
+
+可以选择的备份格式：*.bak、*.sql、*.tar
+
+- 单个数据库
+
+```sh
+# 备份数据库到bak文件
+pg_dump dbname > dbname.bak
+
+# 从bak文件恢复数据到指定数据库，数据库不存在时需要先创建数据库
+psql dbname < dbname.bak
+```
+
+- 全部数据库
+
+```sh
+# 备份所有数据库到bak文件
+pg_dumpall > pg.bak
+
+# 从bak文件恢复所有数据库数据
+psql -f pg.bak [-U] postgres
+```
+
+#### 用户操作
+
+```sql
+# 创建用户并设置密码
+create user 'username' with password 'password';
+
+# 修改用户密码
+alter user 'username' with password 'password';
+
+# 指定数据库的所有权限赋予指定用户
+grant all privileges on database 'dbname' to 'username';
+
+# 赋予数据库的所有权限后，还要指定表的所有权限赋予指定用户，才可以读写表
+grant all privileges on all tables in schema 'schema' to 'username';
+
+# 移除指定用户对于指定数据库的所有权限
+revoke all privileges on database 'dbname' from 'username';
+
+# 删除用户
+drop user 'username;
+```
+
+#### 角色管理
+
+pg没有区分用户和角色的概念，唯一区别就是创建用户和创建角色
+
+```sql
+# 默认不具有登录属性
+create role 'rolename';
+
+alter role 'rolename' with login;
+
+# 默认具有登录属性
+create user 'username';
+
+# 查询角色信息
+select * from pg_roles;
+
+# 查询用户信息
+select * from pg_user;
+```
+
+### MySQL
 
 #### windows安装（压缩包版）
 
 以下安装步骤均在管理员身份的dos窗口中执行。
 
-- 1.初始化数据库生成空的登录密码：
+1. 初始化数据库生成空的登录密码：
 
    ```cmd
    mysqld --initialize -insecure –user=mysql
    ```
 
-- 2.安装 mysql（服务）：
+2. 安装 mysql（服务）：
 
    ```cmd
        mysqld --install mysql
    ```
 
-- 3.免密码登录
-
-```cmd
-mysqld --console --skip-grant-tables --shared-memory
-```
-
-- 4.密码设置为空
-
-```cmd
-# 将密码置为空
-update user set authentication_string='' where user='root';
-```
-
-- 4.启动 mysql 服务：
+3. 启动 mysql 服务：
 
    ```cmd
    net start mysql
    ```
 
-- 5.登录 mysql 服务器，初始化没有生成密码，提示输入密码直接按回车登录：
+4. 登录 mysql 服务器，初始化没有生成密码，提示输入密码直接按回车登录：
 
    ```cmd
    mysql -u root -P 端口 -p
    ```
 
-- 6.修改 root 账户密码：
+5. 修改 root 账户密码：
 
-```cmd
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'mysql123';
-```
+   ```cmd
+   ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'mysql123';
+   ```
 
-- 7.关闭服务：
+6. 关闭服务：
 
-```cmd
-net stop mysql
-```
+   ```cmd
+   net stop mysql
+   ```
 
-- 8.移除 mysql（服务）：
+7. 移除 mysql（服务）：
 
-```cmd
-mysqld --remove mysql
-```
+   ```cmd
+   mysqld --remove mysql
+   ```
 
 #### linux安装
 
@@ -5573,7 +6199,7 @@ alter table `table_name` add index index_name ( `column1`, `column2`, `column3` 
 alter table `table_name` add fulltext (`column`)
 ```
 
-### 2. SQL Server
+### SQL Server
 
 ```sql
 -- 指定数据库
@@ -5724,12 +6350,55 @@ ldf 文档太大处理方法（先备份数据库）：
 
 数据库导数据OLEDB.12.0未注册解决方法：安装AccessDatabaseEngine2007
 
-### 3. Oracle
+### Oracle
+
+#### 函数
+
+- upper('value')
+
+将参数值转成大写后返回
+
+- lower('VALUE')
+
+将参数值转成小写后返回
+
+- to_char(create_time,'yyyy-MM-dd HH24:mi:ss')
+
+将字段值转为指定格式字符串
+
+- to_date('2022-02-02 13:14:20','yyyy-MM-dd HH24:mi:ss')
+
+将参数值转为指定格式的日期
+
+- nvl(表达式1，表达式2)
+
+把一个空值（null）转换成一个实际的值。如果表达式1为空值，返回表达式2的值，否则返回表达式1的值。表达式1和表达式2的数据类型必须为同一个类型。
+
+- nvl2(表达式1，表达式2，表达式3)
+
+如果表达式1为空，返回值为表达式3的值。如果表达式1不为空，返回值为表达式2的值
+
+- round(number, 小数位数)
+
+四舍五入
+
+- replace(source, 被替换的字符, 替换成什么字符)
+
+#### 分页查询
 
 ```sql
--- 创建表
-create table temp_tb as select id from person where JOB_SITUATION='在职'
+select * from (
+    select rownum rowNumber, total.* from (
+        select ... order by ...
+    ) total
+    where rownum < pageNumber * pageSize
+)
+where rowNumber > (pageNumber - 1) * pageSize
+```
 
+#### sql
+
+```sql
 --查询当前用户下是否有某个表，表名要大写
 select table_name from user_tables where table_name=upper('temp_tb')
 
@@ -5780,14 +6449,6 @@ select max(length(CONTROL_TYPE_NAME)) from  EMP_INFO
 --创建会话级临时表,当用户退出会话结束时（connection打开后关闭算会话结束），Oracle自动清除临时表中数据，但保留表结构
 create global temporary table temp_tb on commit preserve rows as select * from person
 
--- 分页查询
--- currentPageMaxRowNumber = pageSize + offset
-select * from (
-    select rownum rowNumber, all.* from (
-        select ...
-    ) all where rownum < currentPageMaxRowNumber
-) where rowNumber > offset
-
 -- 声明方法
 declare
     i number(2) := 10;
@@ -5817,7 +6478,7 @@ begin
 end;
 ```
 
-### 4.Redis
+### Redis
 
 ACID：（Atomicity）原子性、（Consistency）一致性、（Isolation）独立性、（Durability）持久性
 CAP：（Consistency）强一致性、（Availability）可用性、（Partition tolerance）分区容错性
@@ -6362,46 +7023,110 @@ lock.unlock();
 
 ### Eclipse
 
-#### Eclipse快捷键
-
-多行缩进，先选中要缩进的代码：
-
-- 向右缩进：Tab
-- 向左缩进：Shift+Tab
-
-Java代码注释 / 取消注释：Ctrl+/
-
-全局注释 / 取消注释：Ctrl+Shift+C
+|快捷键|功能|
+|:-|:-|
+|Tab|向右缩进|
+|Shift + Tab|向左缩进|
+|Ctrl + /|注释/取消注释|
+|Ctrl + Shift + C|全局注释/取消注释|
 
 ### IDEA
 
-#### IDEA快捷键
-
-- 向右缩进：Tab
-- 全局搜索：Ctrl + Shift + F
-- 搜索类：按两下Shift
-- 注释或取消注释：Ctrl+/
-- 字母大小写转换：Ctrl + Shift + U
+|快捷键|功能|
+|:-|:-|
+|Tab|向右缩进|
+|Shift + Tab|向左缩进|
+|Ctrl + /|注释/取消注释|
+|按两下Shift|类搜索|
+|Ctrl + Shift + F|全局搜索|
+|Ctrl + Shift + R|全局替换|
+|Ctrl + Shift + U|大小写转换|
+|Ctrl + Shift + O|优化导入语句|
+|Ctrl + Shift + L|代码格式化|
+|Ctrl + Alt + M|提取代码为作为方法|
+|Ctrl + Alt + C|修改变量作用域|
 
 ### 常见问题及处理方法
 
-#### 控制台输出中文乱码
+## VirtualBox
 
-![区域设置](2022-04-01-00-00-10.png)
+### 网络
+
+需要根据电脑当前实际使用的网络进行选择，当前是用网线的就选网线网络对应的网卡；当前是用WIFI的就选WIFI网络对应的网卡
+
+![网卡选择](/images/网卡选择.png)
 
 ## Linux篇
 
-### Linux安装
+### Linux目录结构
 
-- 手动分三个分区
+- / 根目录，在此目录下创建其它目录
 
-1.boot：1g，设备类型：标准分区，文件系统：`ext4`
-2.swap：内存多大就设置多大，设备类型：标准分区，文件系统：`swap`
-3./：总空间-boot分区大小-swap分区大小剩余的大小，设备类型：标准分区，文件系统`ext4`
+- /bin (usr/bin usr/local/bin) binary的缩写，存放着最经常使用的命令
+
+- /sbin (usr/sbin usr/local/sbin) 存放着系统管理员使用的系统管理程序
+
+- /home 存放着普通用户的主目录，在Linux中每个用户都有一个自己的目录，一般该目录名是用户的账号
+
+- /root 系统管理员的用户主目录
+
+- /lib 系统开机所需要最基本的动态链接共享库，类似Windows的dll文件，几乎所有的应用程序都需要用到这些共享库
+
+- /lost+found 这个目录一般情况下是空的，系统非法关机后，这里就存放了一些文件
+
+- /etc 所有的系统管理所需要的配置文件和目录，比如mysql的my.conf
+
+- /usr 用户的很多应用程序和文件都放在这个目录下，类似Windows的program files目录
+
+- /boot 存放启动Linux时使用的一些核心文件，包括一些连接文件以及镜像文件
+
+- /proc 不能动，这个目录是一个虚拟的目录，它是系统内存的映射，访问这个目录来获取系统信息
+
+- /srv 不能动，service的缩写，该目录存放一些服务启动之后需要提取的数据
+
+- /sys 不能动，这是linux2.6内核的一个很大的变化，该目录下安装了2.6内核中新出现的一个文件系统sysfs
+
+- /tmp 用来存放一些临时文件
+
+- /dev device的缩写，类似Windows的设备管理器，把所有的硬件用文件的形式存储
+
+- /media linux系统会自动识别一些设备，例如U盘、光驱等，当识别后，Linux会把识别的设备挂载到这个目录下
+
+- /mnt 系统提供该目录是为了让用户临时挂载别的文件系统，我们可以将外部的存储挂载在/mnt上，然后进入该目录就可以查看里面的内容了
+
+- /opt 给主机额外安装软件存放的目录，如mysql、jdk等的安装文件
+
+- /usr/local 也是安装软件所安装的目录，一般是通过编译源码方式安装的程序，存放的是可执行程序
+
+- /var 存放着在不断扩充的东西，习惯将经常被修改的目录放在这里，包括各种日志文件
+
+- /selinux security-enhanced linux，是一种安全子系统，它能控制程序只能访问特定文件，有三种工作模式，可以自行设置
+
+### 安装Linux系统
+
+手动设置三个分区
+
+#### `boot`分区
+
+- 分区大小：`1g`
+- 设备类型：`标准分区`
+- 文件系统：`ext4`
+
+#### `swap`分区
+
+- 分区大小：`内存多大就设置多大`
+- 设备类型：`标准分区`
+- 文件系统：`swap`
+
+#### `/`分区
+
+- 分区大小：`总空间 - boot分区大小 - swap分区大小`
+- 设备类型：`标准分区`
+- 文件系统：`ext4`
 
 - 生产环境还需设置开启kdump
 
-### 软件安装
+### Linux软件安装
 
 #### 安装`*.src.rpm`形式的源代码软件包
 
@@ -6475,20 +7200,403 @@ rm -rf 安装目标路径
 
 ### Linux常用命令
 
-#### 运行级别
+#### Linux帮助命令
 
 ```sh
-# 获取当前机器默认模式
+# 获得命令/配置文件的帮助信息
+man 命令/配置文件
+
+# 获得shell内置命令的帮助信息
+help 命令
+```
+
+#### 重启和关机
+
+- 立即重启，`shutdown -r now` 或 `reboot` 或 `systemctl reboot`
+
+- 立即关机，`shutdown -h now` 或 `halt` 或 `systemctl poweroff`
+
+- 一分钟后关机，`shutdown` 或 `shutdown -h 1`
+
+- 把内存数据同步到磁盘，`sync`
+
+注意：虽然shutdown/reboot/halt等命令已经在关机前进行了`sync`，我们在重启或关机前最好还是执行一次`sync`
+
+#### 登录和注销
+
+登录时尽量少用root账号登录，避免操作失误；当权限不够时，可以通过切换用户命令切换为管理员身份
+
+- 切换用户
+
+```sh
+# 从权限高的用户切换到权限低的用户，不需要输入密码，反之需要输入密码
+# 切换用户后返回到原来用户，使用 exit/logout
+su - 用户名
+```
+
+- 注销，`logout`
+
+注意：`logout`在运行级别3以下有效，在图形运行级别无效
+
+#### 用户管理
+
+- 添加用户
+
+```sh
+# 创建用户成功后，会自动创建和用户名相同的家目录: /home/用户名
+useradd 用户名
+
+# 创建新用户并指定家目录
+useradd -d 指定目录 用户名
+```
+
+- 指定/修改用户密码
+
+```sh
+passwd 用户名
+```
+
+- 删除用户
+
+```sh
+# 删除用户，但是保留用户的家目录
+userdel 用户名
+
+# 删除用户及用户的家目录，谨慎使用
+userdel -r 用户名
+```
+
+- 查询用户信息
+
+```sh
+id 用户名
+```
+
+- 查看当前用户信息（是登录用户，非切换后的用户）
+
+```sh
+whoami/who am i
+```
+
+#### 用户组
+
+用户组类似于角色，系统通过用户组对有共性（权限）的用户进行统一管理
+
+- 新增用户组
+
+```sh
+groupadd 用户组名称
+```
+
+- 删除用户组
+
+```sh
+groupdel 用户组名称
+```
+
+- 添加用户时指定用户组，如果不指定则系统默认创建一个和用户同名的组，并将用户添加到组中
+
+```sh
+useradd -g 用户组名称 用户名
+```
+
+- 修改用户所属的用户组
+
+```sh
+usermod -g 用户组名称 用户名
+```
+
+#### 用户和组相关文件
+
+- /etc/passwd文件 用户的配置文件，记录用户的各种信息
+
+每行的含义：用户名:口令(x):用户标识号(uid):组标识号(gid):注释性描述:主目录(家目录):登录Shell(一般是Bash shell)
+
+- /etc/shadow文件 口令的配置文件
+
+每行的含义：登录名:加密口令:最后一次修改时间:最小时间间隔:最大时间间隔:警告时间:不活动时间:失效时间:标志
+
+- /etc/group文件 用户组的配置文件，记录Linux包含的组的信息
+
+每行的含义：组名:口令(x):组标识号(uid):组内用户列表
+
+#### 运行级别
+
+运行级别说明：
+
+- 0：关机
+
+- 1：单用户【找回丢失密码】
+
+- 2：多用户状态无网络服务
+
+- 3：多用户状态有网络服务
+
+- 4：系统未使用，保留给用户的运行级别
+
+- 5：图形界面
+
+- 6：系统重启
+
+- 常用运行级别是3和5，可以指定默认运行级别
+
+- 切换运行级别
+
+```sh
+init 运行级别
+```
+
+- CentOS 7 在/etc/inittab文件中进行了简化
+
+multi-user.target:analogou to runlevel 3
+graphical.target.target:analogou to runlevel 5
+
+```sh
+# 获取当前机器默认运行级别
+systemctl get-default
+
+# 设置当前机器默认运行级别
 systemctl set-default multi-user.target
+```
 
-# 获取当前机器默认模式：图形界面模式或文本模式
-systemctl isolate get-default
+#### 找回root密码
 
-# 将当前操作环境切换为图形界面模式
-systemctl isolate graphical.target
+- 重启系统，在开机界面按“e”进入编辑界面
 
-# 将当前操作环境切换为纯文本模式
-systemctl isolate multi-user.target
+![开机界面](/images/开机界面.png)
+
+- 在编辑界面光标往下移动，定位到“linux16”开头最在行的末尾，输入`init=/bin/sh`，完成后按“Ctrl + X”进入单用户模式
+
+![编辑界面](/images/编辑界面.png)
+
+- 在光标闪烁的位置输入`mount -o remount,rw /`，完成后按`回车`
+
+- 在新的一行输入`passwd`，完成后按`回车`
+
+- 然后输入新密码，完成后按`回车`；然后再次输入新密码，完成后按`回车`；显示passwd...的样式，说明密码修改成功
+
+- 在光标闪烁的位置输入`touch /.autorelabel`，完成后按`回车`
+
+- 在光标闪烁的位置输入`exec /sbin/init`，完成后按`回车`，等待系统自动修改密码，过程可能有点长，完成后系统会自动重启，就可以输入密码登录了
+
+![单用户模式界面](/images/单用户模式界面.png)
+
+#### 文件目录命令
+
+- 常用目录
+
+```sh
+# 当前目录
+./
+
+# 当前目录的上一级目录
+..
+
+# 家目录
+~
+```
+
+- 显示当前所在目录的绝对路径
+
+```sh
+pwd
+```
+
+- 展示当前目录下的文件和目录
+
+```sh
+# -a，展示当前目录下所有的文件和目录，包括隐藏的
+# -l，以列表的方式显示信息
+ls [-a|-l] 文件/目录
+```
+
+- 切换到指定目录
+
+```sh
+cd 目录
+
+# 切换到当前目录上一级目录
+cd ..
+# 切换到上上级目录
+cd ../..
+# 切换到家目录
+cd ~
+```
+
+- 创建空文件
+
+```sh
+touch 文件名称
+```
+
+- 新建目录
+
+```sh
+# mkdir默认创建一级目录，通过指定选项 -p 创建多级目录
+mkdir [-p] 目录名称
+```
+
+- 删除空目录
+
+```sh
+rmdir [可选项] 目录名称
+```
+
+- 删除非空目录（谨慎操作）
+
+```sh
+# -r：递归，-f：强制
+rm [可选项] 目录/文件
+
+# 删除文件hello.txt
+rm /code/hello.txt
+
+# 强制删除整个hello目录不提示
+rm -rf /hello
+```
+
+- 复制目录/文件到指定目录
+
+```sh
+# \ 强制覆盖不提示 -r 递归整个目录
+[\]cp [-r] 源目录/文件 目的目录
+
+# 复制文件hello.txt到file目录下
+cp /code/hello.txt /file
+
+# 复制整个code目录到file目录下
+cp -r /code /file
+```
+
+- 移动/重命名目录/文件
+
+```sh
+# 当旧目录与新目录一样时，就是重命名
+mv 旧文件名 新文件名
+
+# 当源目录/文件与目的目录/文件名称不一样时，就是移动并重命名
+mv 源目录/文件 目的目录/文件
+```
+
+- cat查看文件内容
+
+```sh
+# -n 显示行号，cat只能浏览不能修改，一般带上管道命令 "| more"，将cat命令的处理结果交给more命令处理
+cat [可选项] 文件名称
+
+cat -n /etc/profile | more
+```
+
+#### more命令
+
+more命令时基于vi编辑器的文本过滤器，它以全屏幕的方式按页显示文本文件的内容
+
+```sh
+more 文件名称
+```
+
+|快捷键|功能|
+|:-|:-|
+|空格|下一页|
+|回车|下一行|
+|ctrl + f|下一屏|
+|ctrl + b|上一屏|
+|=|当前行号|
+|:f|文件名和当前行号|
+|q|退出more|
+
+#### less命令
+
+```sh
+less  文件名称
+```
+
+less命令用来分屏查看文件内容，功能比more强大。less根据显示需要加载内容，对于大型文件具有更高的效率。
+
+|快捷键|功能|
+|:-|:-|
+|空格|下一页|
+|pagedown|下一页|
+|pageup|上一页|
+|/字符串|向下查找字符串，n向下查找；N向上查找|
+|?字符串|向上查找字符串，n向下查找；N向上查找|
+|q|退出less|
+
+#### head命令
+
+head用于显示文件的开头部分内容，默认前10行
+
+```sh
+# 查看文件前[任意行]内容
+head [-n 任意正整数]  文件名称
+```
+
+#### tail命令
+
+用于显示文件的末尾部分内容，默认末尾10行
+
+```sh
+# 查看末尾[任意行]内容
+tail [-n 任意正整数]  文件名称
+
+# 实时追踪该文档的所有更新
+tail -f 文件名称
+```
+
+#### eccho命令
+
+用于输出内容到控制台
+
+```sh
+echo [可选项] 输出内容
+
+# 输出环境变量（要大写）
+echo $PATH
+
+# 输出字符串
+echo "hello world"
+```
+
+#### >命令
+
+输出重定向（覆盖）
+
+```sh
+# 将输出到控制台的字符串重定向（覆盖写）到hello.txt（文件不存在会自动创建）
+echo "hello world" > hello.txt
+```
+
+#### >>命令
+
+追加
+
+```sh
+# 将输出到控制台的字符串追加写到hello.txt
+echo "hello world" >> hello.txt
+```
+
+#### ln命令
+
+软链接（符号链接），类似于windows里的快捷方式，存放了链接到其它文件的路径
+
+```sh
+# 给目录/文件创建一个软链接
+ln -s 目录/文件 软链接名称
+
+# 删除链接
+rm 链接名称
+```
+
+#### history命令
+
+查看执行过的历史命令
+
+```sh
+# 显示最近执行过的任意条命令
+history [任意正整数]
+
+# 执行对应历史编号的命令
+!历史命令编号
 ```
 
 #### 网络命令
@@ -6512,12 +7620,6 @@ service network restart
 #### 系统命令
 
 ```sh
-# 重启系统
-systemctl reboot
-
-# 关闭系统
-systemctl poweroff
-
 # 显示操作系统的发行版号
 uname -r
 
@@ -6536,78 +7638,6 @@ sudo yum update
 ```sh
 # 查看关于nginx的系统日志
 cat /var/log/messages | grep nginx
-```
-
-- 切用户
-
-```sh
-su - 用户名
-```
-
-- 展示当前目录
-
-```sh
-pwd
-```
-
-- 当前目录
-
-```sh
-./
-```
-
-- 展示当前目录下的内容
-
-```sh
-ls
-```
-
-- 展示指定目录下的内容
-
-```sh
-ls -l /路径名/
-```
-
-- 新建文件
-
-```sh
-touch 文件名
-```
-
-- 新建目录
-
-```sh
-mkdir -p 目录名
-```
-
-- 删除文件
-
-```sh
-rm -f 文件名
-```
-
-- 删除文件夹(包括文件夹中的内容），-r：循环的意思，f：不询问
-
-```sh
-rm -rf 文件夹名 
-```
-
-- 复制一个文件夹到另一个文件夹下
-
-```sh
-sudo cp -r 源文件夹 目标文件夹
-```
-
-- redis.conf 重命名为redis_original.conf
-
-```sh
-mv redis.conf redis_original.conf
-```
-
-- 移动文件夹
-
-```sh
-mv 源文件夹 目标文件夹
 ```
 
 - 解压文件
@@ -6660,20 +7690,48 @@ yum search java|grep jdk
 
 # 从查询结果中选择jdk安装
 yum install java-1.8.0-openjdk-devel.x86_64
+
+# 当前日历信息
+cal
 ```
 
-### vi编辑器
+### vi/vim编辑器
 
-1. vi命令打开文件后，定位到要修改的行
+vim就是vi的增强版
 
-    ```sh
-    vim 文件名
-    ```
+- 打开文件`vi 文件名`或`vim 文件名`
 
-2. 键入i，然后修改内容
-3. 修改完成按esc退出编辑模式
-4. 按"shift" + ":"，输入wq，然后按回车保存退出
-5. 按"shift" + ":"，输入q!，然后按回车强制退出
+- 从一般模式进入编辑模式，`i`
+
+- 从一般模式进入命令模式，`:`或`/`
+
+- 从编辑/命令模式进入一般模式`esc`
+
+- 保存退出，`:wq`
+
+- 退出，`:q`
+
+- 强制退出，不保存，`:q!`
+
+- 复制当前行`yy`，复制当前光标所在行及其向下的共n行，`nyy`
+
+- 粘贴，`p`
+
+- 删除当前行`dd`，复制当前光标所在行及其向下的共n行，`ndd`
+
+- 撤销，`u`
+
+- 跳到文档开始行，`gg`
+
+- 跳到文档末尾行，`G`
+
+- 跳转到第n行，`n shift g`
+
+- 显示行号，`:set nu`
+
+- 隐藏行号，`:set nonu`
+
+- 查找，`/关键字`，按回车开始查找，按`n`查找下一个
 
 ## nginx
 
@@ -6768,232 +7826,11 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
-## Vue
+## markdown
 
-### el的两种写法
-
-- 第一种写法
-
-```html
-<body>
-    <div id="root"></div>
-    <script type="text/javascript">
-        new Vue({
-            el: "#root"
-        })
-    </script>
-</body>
-```
-
-- 第二种写法
-
-```html
-<body>
-    <div id="root"></div>
-    <script type="text/javascript">
-        const vm = new Vue({
-        })
-        vm.$mount("#root")
-    </script>
-</body>
-```
-
-### data的两种写法
-
-- 对象式写法
-
-```html
-<body>
-    <div id="root">
-    </div>
-    <script type="text/javascript">
-        new Vue({
-            el: "#root",
-            data: {
-                name: "呆鹅大人"
-            }
-        })
-    </script>
-</body>
-```
-
-- 函数式写法data: function() {} 或简写data() {}
-
-```html
-<body>
-    <div id="root">
-    </div>
-    <script type="text/javascript">
-        new Vue({
-            el: "#root",
-            data: function() {
-                return {
-                    name: "呆鹅大人"
-                }
-            }
-        })
-    </script>
-</body>
-```
-
-### 插值语法
-
-{{表达式}}
-
-### 指令语法
-
-`v-bind:标签属性="表达式"`或`:标签属性="表达式"`
-
-### 数据绑定
-
-单向绑定v-bind，双向绑定v-model，双向绑定只能用在表单类元素（输入类元素，这些元素都有value）上
-
-```html
-<body>
-    <div id="root">
-        <!-- 普写 -->
-        <p>单向数据绑定：<input type="text" v-bind:value="name"></p>
-        <p>双向数据绑定：<input type="text" v-model:value="name"></p>
-
-        <!-- 简写 -->
-        <p>单向数据绑定：<input type="text" :value="name"></p>
-        <p>双向数据绑定：<input type="text" v-model="name"></p>
-    </div>
-    <script type="text/javascript">
-        new Vue({
-            el: "#root",
-            data: {
-                name: "呆鹅大人"
-            }
-        })
-    </script>
-</body>
-```
-
-### 数据代理
-
-```html
-<body>
-    <script type="text/javascript">
-        let number = 12
-        let person = {
-            name: "呆鹅大人",
-            sex: "女"
-        }
-        // person再定义一个age属性
-        Object.defineProperty(person, "age", {
-            // // 设置age的值为18
-            // value: 18,
-            // // 控制属性是否可枚举，默认false
-            // enumerable: true,
-            // // 控制属性是否可修改，默认false
-            // writable: true,
-            // // 控制属性是否可以被删除，默认false
-            // configurable: true,
-
-            // 当程序读取person的age属性时，get函数（getter）就会被调用，且返回值就是age的值
-            // 可简写为get() {}
-            get: function () {
-                return number
-            },
-            // 当程序修改person的age属性时，set函数（setter）就会被调用
-            // 可简写为set() {}
-            set: function (value) {
-                number = value
-            }
-        })
-        console.log(person)
-    </script>
-</body>
-```
-
-### 事件处理
-
-- @click="showInfo" 和 @click="showInfo2($event)，但后者可以传参
-
-```html
-<body>
-    <div id="root">
-        <!-- 普写 -->
-        <button v-on:click="showInfo">点我提示信息1</button>
-        <!-- 简写 -->
-        <button @click="showInfo">点我提示信息2</button>
-        <button @click="showInfo2($event, 666)">点我提示信息3</button>
-    </div>
-    <script type="text/javascript">
-        Vue.config.productionTip = false
-
-        new Vue({
-            el: "#root",
-            methods: {
-                // 也可以用代参数的写法showInfo(event) {}
-                showInfo() {
-                    alert("hello world")
-                },
-                showInfo2(event, number) {
-                    alert("hello world" + number)
-                }
-            },
-        })
-    </script>
-</body>
-```
-
-- 事件修饰符
-
-```html
-<body>
-    <div id="root">
-        <!-- 阻止默认事件(这里默认事件是跳转) -->
-        <a href="https://www.baidu.com" @click.prevent="showInfo">点我提示信息</a>
-
-        <!-- 阻止事件冒泡（这里冒泡是指按钮弹窗后div再弹一次） -->
-        <div class="demo1" @click="showInfo">
-            <button @click.stop="showInfo">点我提示信息</button>
-        </div>
-
-        <!-- 事件只触发一次 -->
-        <button @click.once="showInfo">事件只触发一次</button>
-
-        <!-- 使用事件的捕获模式，默认是先2后1 -->
-        <div class="box1" @click.capture="showMessage(1)">
-            div1
-            <div class="box2" @click="showMessage(2)">
-                div2
-            </div>
-        </div>
-
-        <!-- 只有event.target是当前操作的元素时才触发事件，一定程度上有点像阻止冒泡 -->
-        <div class="demo1" @click.self="showInfo">
-            <button @click="showInfo">点我提示信息</button>
-        </div>
-
-        <!-- 事件的默认行为立即执行，无需等待事件回调执行完毕(先滚动，无需等待showInfo执行完毕才滚动) -->
-        <ul @wheel.passive="showInfo">
-            <li>1</li>
-            <li>2</li>
-            <li>3</li>
-            <li>4</li>
-        </ul>
-
-    </div>
-    <script type="text/javascript">
-        Vue.config.productionTip = false
-
-        new Vue({
-            el: "#root",
-            methods: {
-                // 也可以用代参数的写法showInfo(event) {}
-                showInfo() {
-                    alert("hello world")
-                },
-                showMessage(number) {
-                    alert(number)
-                }
-            },
-        })
-    </script>
-</body>
+```md
+# 图片语法
+![可选的图片描述，当图片不能被显示时而出现的替代文字](图片相对路径 "鼠标悬置于图片上会出现的文字，可以不写")
 ```
 
 ## 算法篇
@@ -7034,3 +7871,19 @@ public class ExceptionTest {
     }
 }
 ```
+
+## Windows的host文件
+
+- hosts文件里可建立许多常用域名与其对应IP的映射。当用户在浏览器中输入一个想要浏览的网址时，系统会首先在hosts文件里面查找有没有对应的IP，若有的话，则会立即打开对应的网页；若是没有，则会请求DNS服务器进行解析
+
+- hosts文件目录为在`C:\Windows\System32\drivers\etc\`
+
+- hosts语法格式 1个IP对应1个主机名或域名，构成一组对应关系。一组对应关系占一行。IP在前，主机名或网址在后；IP与主机名间至少有1个空格。加注释就在前面加上#，如果这一行开头有个#，则这一行全为注释内容。
+
+```hosts
+127.0.0.1 www.baidu.com
+```
+
+- 当我们在文件中写入“127.0.0.1+空格+你想屏蔽的网址”，或者是“0.0.0.0+空格+你想屏蔽的网址”就可以实现该网站的屏蔽
+  
+- cmd 输入 `ipconfig /flushdns` 让host文件生效
