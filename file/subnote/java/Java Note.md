@@ -2728,6 +2728,20 @@ List list5 = Arrays.asList(array2);
 
 #### String与byte[]互转
 
+‌Java18‌正式将标准Java API的默认字符集更改为UTF-8，如String.getBytes() 和 new String(byte[])可以不用指定编码了，但是还是强烈建议显式指定字符编码
+
+```java
+// 可以通过java -Dfile.encoding=UTF-8 MyApp设置默认编码
+
+// 可以通过以下两种方法获取默认编码
+String defaultEncoding = System.getProperty("file.encoding");
+System.out.println("当前默认编码: " + defaultEncoding);
+
+// 推荐
+Charset defaultCharset = Charset.defaultCharset();
+System.out.println("默认编码名称: " + defaultCharset.name());
+```
+
 - String 转 byte[]
 
 ```java
@@ -4821,6 +4835,191 @@ mvn -Pnative package
 
 ## Java高级
 
+### NIO
+
+同步非阻塞IO，相关类都放在java.nio包及子包下
+
+三大核心：Selector、Channel、Buffer
+
+```java
+// Buffer的简单使用
+// 定义一个可以存放5个int的IntBuffer
+IntBuffer intBuffer = IntBuffer.allocate(5);
+for (int i = 0; i < intBuffer.capacity(); i++) {
+    // 向IntBuffer存数据
+    intBuffer.put(i * 2);
+}
+// IntBuffer读写切换
+intBuffer.flip();
+while (intBuffer.hasRemaining()) {
+    // 从IntBuffer取数据
+    System.out.println(intBuffer.get());
+}
+```
+
+#### Buffer
+
+Buffer本质上是一个可读写数据的内存块，可以看成一个数组
+
+除了boolean，其它7中基本数据类型都有对应的Buffer子类，ByteBuffer会比较常用
+
+- 每个Buffer都有四个属性，提供关于其所包含的数据元素的信息
+    - mark，标记，一旦flip后就废了，一般不会主动去改动
+    - position，位置，下一个要被读或写的元素的索引
+        - 每次读写缓冲区数据时都会改变改值，为下次读写做准备
+    - limit，表示缓冲区的当前终点，不能对缓冲区超过极限的位置进行读写操作，且极限是可以修改的
+        - 比如设置容量为5，limit就是5，index只能是0-4
+    - capacity，容量，即可以容纳的最大数据量，在缓冲区创建时被设定且不能改变
+
+- 常用方法
+    - capacity()，返回缓冲区的容量
+    - position()，返回缓冲区的位置
+    - position(int newPosition)，设置缓冲区的位置
+    - limit()，返回缓冲区的限制
+    - limit(int newLimit)，设置缓冲区的限制
+    - clear()，清除缓冲区，将各个标记恢复到初始状态，但是数据并没有真正清除
+    - flip()，反转缓冲区
+        - 会将position赋值给limit，以及将position设置为0
+    - hasRemaining()，在当前位置和限制之间是否还有元素
+    - isReadOnly()，缓冲区是否只读
+    - hasArray()，缓冲区是否具有可访问的底层实现数组
+    - array()，返回缓冲区的底层实现数组
+
+##### ByteBuffer
+
+- 常用方法
+    - allocateDirect(int capacity)，创建直接内存缓冲区
+    - allocate(int capacity)，设置缓冲区的初始容量
+    - get()，从当前位置获取，position会自动加1
+    - get(int index)，从指定位置获取
+    - put(byte b)，从当前位置添加，position会自动加1
+    - put(int index, byte b)，从指定位置添加
+
+- 注意事项
+    - put放入的是什么数据类型，get就要用相应类型取出，否则就可能抛异常
+
+```java
+ByteBuffer byteBuffer = ...;
+...
+byteBuffer.flip();
+// 可以转为只读buffer
+ByteBuffer byteBuffer2 = byteBuffer.asReadOnlyBuffer();
+```
+
+#### Channel（通道）
+
+通道类似于流，但可以同时读写
+
+- 常用的通道类有
+    - FileChannel，主要用来对本地文件进行读写，常用方法
+        - read(ByteBuffer dst)，从通道读取数据并放到缓冲区中
+        - write(ByteBuffer src)，把缓冲区的数据写到通道中
+        - transferFrom(src, position, count)，从指定通道中复制数据到当前通道
+        - transferTo(position, count, target)，把数据从当前通道复制到目标通道
+        - 不要盲目用FileChannel，只有部分方法会比传统的I/O流更快，使用直接内存只比传统的I/O流快一丢丢，用jvm内存甚至会更慢
+    - DatagramChannel，用于UDP的数据读写
+    - ServerSocketChannel和SocketChannel，用于TCP的数据读写
+
+```java
+// 用通道写文件
+String content = "你好，世界! " + System.currentTimeMillis();
+try (FileOutputStream fileOutputStream = new FileOutputStream("./file.txt");
+        FileChannel fileChannel = fileOutputStream.getChannel();) {
+    ByteBuffer byteBuffer = ByteBuffer.allocate(content.getBytes(StandardCharsets.UTF_8).length);
+    byteBuffer.put(content.getBytes(StandardCharsets.UTF_8));
+    byteBuffer.flip();
+    fileChannel.write(byteBuffer);
+} catch (IOException e) {
+    throw new RuntimeException(e);
+}
+
+// 用通道读文件
+try (FileInputStream fileInputStream = new FileInputStream("./file.txt");
+        FileChannel fileChannel = fileInputStream.getChannel();) {
+    // 要注意文件大小是否溢出int
+    ByteBuffer byteBuffer = ByteBuffer.allocate((int) fileChannel.size());
+    fileChannel.read(byteBuffer);
+    System.out.println(new String(byteBuffer.array(), StandardCharsets.UTF_8));
+} catch (IOException e) {
+    throw new RuntimeException(e);
+}
+
+// 用一个byteBuffer循环读写
+// 一定不要忘了这句，不然fileChannel2写完后，position和limit的值相等，fileChannel1.read(byteBuffer)将永远返回0
+while(true) {
+    byteBuffer.clear();
+    int read = fileChannel1.read(byteBuffer);
+    if (read == -1) {
+        break;
+    }
+    byteBuffer.flip();
+    fileChannel2.write(byteBuffer);
+}
+
+// 文件拷贝
+fileChannel2.transferFrom(fileChannel1, 0, fileChannel1.size());
+
+
+// 修改文件内容
+try {
+    RandomAccessFile randomAccessFile = new RandomAccessFile("./file.txt", "rw");
+    FileChannel fileChannel = randomAccessFile.getChannel();
+    // MappedByteBuffer可以直接在堆外内存修改文件，操作系统无需进行一次拷贝
+    // 参数1: FileChannel.MapMode.READ_WRITE，使用读写模式
+    // 参数2: 修改的起始位置
+    // 参数3: 映射到内存的大小，不是索引位置，即将文件的多少个字节映射到内存
+    MappedByteBuffer mappedByteBuffer = fileChannel.map(FileChannel.MapMode.READ_WRITE, 0, 15);
+    mappedByteBuffer.put(9, "Handle".getBytes(StandardCharsets.UTF_8));
+} catch (IOException e) {
+    throw new RuntimeException(e);
+}
+
+// Scattering（分散）：将数据写入buffer时，可以指定一个buffer数组，如果第一个buffer不够写，将会依次写入下一个buffer
+// Gathering（聚集）：从buffer读取数据时，可以指定一个buffer数组，将会依次读取每个buffer的数据
+// 下面的代码还没测试
+try (ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();) {
+    InetSocketAddress inetSocketAddress = new InetSocketAddress(8888);
+    // 绑定端口到socket并启动
+    serverSocketChannel.socket().bind(inetSocketAddress);
+    // 监听客户端连接
+    SocketChannel socketChannel = serverSocketChannel.accept();
+
+    ByteBuffer[] byteBuffers = new ByteBuffer[2];
+    byteBuffers[0] = ByteBuffer.allocate(6);
+    byteBuffers[1] = ByteBuffer.allocate(4);
+
+    int messageLength = 8;
+    while (true) {
+        int byteRead = 0;
+
+        // 读
+        while (byteRead < messageLength) {
+            long length = socketChannel.read(byteBuffers);
+            byteRead += length;
+            System.out.println("byteRead = " + byteRead);
+            for (ByteBuffer item : byteBuffers) {
+                System.out.println(item);
+            }
+        }
+        for (ByteBuffer item : byteBuffers) {
+            item.flip();
+        }
+        // 写
+        int byteWrite = 0;
+        while (byteWrite < messageLength) {
+            long length = socketChannel.write(byteBuffers);
+            byteWrite += length;
+        }
+        for (ByteBuffer item : byteBuffers) {
+            item.clear();
+        }
+        System.out.println("byteWrite = " + byteWrite);
+    }
+} catch (IOException e) {
+    throw new RuntimeException(e);
+}
+```
+
 ### JVM
 
 ![JVM大致结构模型](/images/JVM大致结构模型.png)
@@ -6524,6 +6723,7 @@ JIT编译器借助逃逸分析来判断同步块所使用的锁对象是否只�
 -XX:+DisableExplicitGC
 
 # java25开始，可以启用紧凑对象头，减少堆内存占用
+# java27开始，HotSpot JVM默认启用紧凑对象头
 -XX:+UseCompactObjectHeaders
 ```
 

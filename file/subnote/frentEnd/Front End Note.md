@@ -7148,6 +7148,142 @@ video.onloadeddata = () => {
 }
 ```
 
+### ajax
+
+```js
+const button = document.querySelector("#sendButton");
+
+button.addEventListener("click", function() {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "https://www.example.com");
+    xhr.send();
+    xhr.onreadystatechange = function() {
+        if(xhr.readyState === 4) {
+            if(xhr.status >= 200 && xhr.status < 300) {
+                // 打印响应体
+                console.log(xhr.response);
+            } else {
+                // 打印响应状态码
+                console.log(xhr.status);
+            }
+        }
+    }
+});
+```
+
+### Promise
+
+```js
+const promise = new Promise((resolve, reject) => {
+    if() {
+        const value = "handle";
+        resolve(value);
+    } else {
+        const reason = "failed reason";
+        reject(reason);
+    }
+});
+
+promise.then((value) => {
+    // 成功做
+}, (reason) => {
+    // 失败做
+});
+
+promise.catch(reason => {});
+
+// 如果参数为非Promise类型，返回结果为成功状态的promise对象
+// 如果参数为Promise对象，则参数的结果决定该函数的返回结果
+const promise = Promise.resolve(0);
+
+// 快速返回结果为失败状态的promise对象
+const promise = Promise.reject(1);
+
+// 只有所有的promise都成功才返回成功状态的promise
+// 只要有一个promise失败了就返回失败状态的promise
+const promise = Promise.all((promiseArray) => {});
+
+// 第一个完成的promise的结果状态就是最终的结果状态
+const promise = Promise.race((promiseArray) => {});
+```
+
+- Promise对象的PromiseState属性
+    - pending、resolved/fullfilled、rejected
+- Promise对象的PromiseResult属性
+    - 保存这对象成功/失败的结果
+    - resolve/reject可以修改这个属性
+
+- 修改promise对象的状态的3种方式
+
+```js
+const promise = new Promise((resolve, reject) => {
+    if() {
+        const value = "handle";
+        // 调用resolve函数，pending -> fulfilled
+        resolve(value);
+    } else if() {
+        const reason = "failed reason";
+        // 调用reject函数，pending -> rejected
+        reject(reason);
+    } else {
+        // 抛出错误
+        throw "error";
+    }
+});
+```
+
+- 给一个promise指定多个回调函数，如then/catch，当promise改变为对应状态时，都会调用
+
+- then的返回值
+    - 如果then抛出了错误，则返回失败状态的promise对象
+    - 如果返回为非Promise类型，返回结果为成功状态的promise对象
+    - 如果返回为Promise对象，则返回的promise的结果由该对象的结果决定
+
+- 如果有多个then（promise链），只需在最后一个then调用catch就可以实现错误处理了
+
+- 中断promise链，在要中断的一个then里返回一个pending的promise：`return new Promise(() => {});`
+
+```js
+const newPromise = promise.then((value) => {
+    // 成功做
+}, (reason) => {
+    // 失败做
+});
+```
+
+### async函数
+
+```js
+async function fun() {};
+
+// 返回值为promise对象，其结果由async函数执行的返回值决定
+// 返回规则跟promise.then方法一样
+const promise = fun();
+```
+
+### await表达式
+
+await右侧的表达式一般为promise对象，但也可以是其它值
+
+如果是promise对象，await返回的是promise成功的值
+
+如果是其它值，直接将该值作为await的返回值
+
+await必须写在async函数中，但async函数中可以没有await
+
+如果await的promise失败了，就会抛出异常，需要通过try-catch捕获
+
+```js
+async function fun() {
+    const promise = new Promise((resolve, reject)=>{});
+    try {
+        const resultPromise = await promise;
+    } catch(error) {
+        console.log(error);
+    }
+};
+```
+
 ## JSP
 
 1) 输出<%:在文本中写<\%
@@ -8947,3 +9083,53 @@ location /api/ {
 
 - 方法2：直接在父元素设置自定义属性，然后通过`::after`读取，推荐
     - 代码：[imageHoverTipDemo2](html/imageHoverTipDemo2.html)
+
+### 必应搜索水平居中显示油猴脚本
+
+注意加上`@run-at      document-start`，这样就不会先显示原来的布局然后闪一下再居中了
+
+```js
+// ==UserScript==
+// @name        必应搜索结果居中显示
+// @namespace   https://github.com/mr-handle
+// @icon
+// @version     1.0.0
+//
+// @match       https://www.bing.com/search*
+// @grant       none
+//
+// @author      handle
+// @description 必应搜索结果居中显示
+// @run-at      document-start
+// ==/UserScript==
+
+(function() {
+    "use strict";
+
+    const pageAlignCenterStyle = `
+        /* 搜索栏居中 */
+        #b_header {
+            max-width: 1200px;
+            margin: 0 auto;
+            box-sizing: border-box;
+        }
+        /* 搜索结果居中 */
+        #b_content {
+            max-width: 1000px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            padding-left: 0px;
+        }
+
+        /* 隐藏更多结果 */
+        #b_context {
+            display: none;
+        }
+    `;
+
+    const element = document.createElement("style");
+    element.type = "text/css";
+    element.appendChild(document.createTextNode(pageAlignCenterStyle));
+    document.head.appendChild(element);
+})();
+```
